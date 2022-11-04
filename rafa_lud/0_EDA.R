@@ -45,6 +45,27 @@ dados_all <- dados1 %>% select(colunas) %>%
 
 (table(dados_all$fonte,dados_all$usou_milha))
 
+dados_unic <- dados_all %>% 
+  filter(dif_av_tav < 500
+         ,Opção_escolhida != 'NSR') %>% 
+  mutate(tempo = case_when(`Tempo_Av-TAV` >= 0 ~ 'AV', T ~ 'TAV')
+         ,dd = dif_av_tav/`Tempo_Av-TAV`) %>% 
+  distinct(SbjNum, Opção_escolhida, dif_av_tav, tempo, `Tempo_Av-TAV`, dd)
+
+summary(dados_unic$dif_av_tav)
+
+ggplot(dados_unic, aes(x=dif_av_tav))+
+  geom_bar()+
+  facet_grid(Opção_escolhida ~ tempo )
+
+ggplot(dados_unic, aes(x=dd, fill = Opção_escolhida))+
+  geom_histogram() + 
+  facet_grid(Opção_escolhida ~ .)
+
+hist(dados_unic$dd, 50)
+
+# Numero de Respondentes (cada um responde duas vezes)
+nrow(dados_all)/2
 
 dados_all %>%  
   ggplot( aes(x=`Tempo_Av-TAV`, y=dif_av_tav, color=Opção_escolhida)) +
@@ -160,8 +181,8 @@ dados_all <- dados_all %>%
 dados_all %>% 
   filter(escolhas == 'mudou') %>% 
   ggplot( aes(x=`Tempo_Av-TAV`, y=dif_av_tav, color=Opção_escolhida)) +
-  geom_point(size=2) + 
-  geom_line(aes(group = SbjNum)) + 
+  geom_point(size=4) + 
+  # geom_line(aes(group = SbjNum)) + 
   facet_grid(tp_escolha ~ .) + 
   theme(legend.position="bottom")
 
